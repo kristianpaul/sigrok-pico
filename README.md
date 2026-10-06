@@ -3,7 +3,7 @@
 Use a Raspberry Pi PICO (RP2040) as a logic analyzer and oscilloscope with sigrok.
 
 ## Status
-=======
+
 Please start with the Getting Started page : https://github.com/pico-coder/sigrok-pico/blob/main/GettingStarted.md
 
 **Merged to mainline sigrok** (September 2023)
@@ -16,14 +16,16 @@ Install from [sigrok.org/downloads](https://sigrok.org/wiki/Downloads). PulseVie
 |----------|-------------|
 | [USER_GUIDE.md](USER_GUIDE.md) | Getting started and analyzer operations |
 | [TECHNICAL.md](TECHNICAL.md) | Serial protocol and build instructions |
+| [logic.py](logic.py) | Live waveforms in a terminal (no PulseView, no libsigrok) |
 | [pulseview/Readme.md](pulseview/Readme.md) | Windows installer |
 
 ## Directory Structure
 
 ```
 sigrok-pico/
+├── logic.py                # Terminal logic analyzer host tool (python 3, stdlib only)
 ├── pico_pgen/              # Digital function generator for testing
-├── pico_sdk_sigrok/        # RP2040 firmware (see release/ for UF2 files)
+├── pico_sdk_sigrok/        # RP2040/RP2350 firmware (see release/ for UF2 files)
 └── pulseview/              # Windows installer (unofficial)
 ```
 
@@ -34,6 +36,22 @@ This project implements a sigrok driver for the Raspberry Pi PICO RP2040 using t
 - **21 digital channels** (D2-D22)
 - **3 analog channels** (A0-A2)
 - **Mixed-mode capture** (combined digital + analog)
+
+### Using a Terminal Instead of PulseView
+
+`logic.py` is a Bus-Pirate-style `logic` command for the same firmware.  It speaks the serial
+protocol directly using only the python 3 standard library - no PulseView, no libsigrok, no
+npm install - and PulseView and sigrok-cli keep working exactly as before:
+
+```bash
+./logic.py -i                          # board identity, clock, pin map, capture envelope
+./logic.py -c GP0,GP1,GP3,GP4          # live waveforms, sample rate picked from the signals
+./logic.py nav -c GP0,GP5              # arrow keys pan and zoom a frozen capture
+./logic.py -f 25e6 -n 0.02 -T GP3=f    # fixed rate, 20 ms window, freeze on a falling edge
+```
+
+Any pin set works, including non-adjacent pins (the libsigrok driver requires a contiguous
+digital channel mask; `logic.py` does not).  See `./logic.py --help` for the rest.
 
 ### Using with PulseView
 
